@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hl7-mirth-auditor"
+version = "1.0.0"
+description = "Clinical LIS/HIS HL7 v2.x Message Stream Inspector & HIPAA Safe Harbor PHI Sanitizer."
+readme = "README.md"
+authors = [{ name = "Dr. Abu Suraih Sakhri", email = "abusuraih@example.com" }]
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+]
+requires-python = ">=3.9"
+dependencies = []
+
+[project.scripts]
+hl7-auditor = "hl7_auditor.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/abusuraihsakhri/hl7-mirth-auditor"
+Repository = "https://github.com/abusuraihsakhri/hl7-mirth-auditor.git"
