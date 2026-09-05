@@ -3,7 +3,7 @@ HL7 v2.x Message Stream Parser.
 Handles standard delimiter extraction, multi-message streams, and segment tree extraction.
 """
 
-from typing import List, Union
+from typing import List, Optional, Union
 import io
 from .models import HL7Message, HL7Segment, HL7MessageType
 
@@ -12,11 +12,17 @@ def parse_hl7_stream(content_or_path: Union[str, io.StringIO]) -> List[HL7Messag
     """
     Parses a string or file containing one or more HL7 v2.x messages.
     """
-    if isinstance(content_or_path, str) and "\n" not in content_or_path and not content_or_path.startswith("MSH"):
+    if isinstance(content_or_path, io.StringIO):
+        raw_text = content_or_path.getvalue()
+    elif isinstance(content_or_path, str) and "\n" not in content_or_path and len(content_or_path) > 0 and not content_or_path.startswith("MSH"):
+        # Treat as file path only if it looks like a path (non-empty, no newlines, not HL7 content)
         with open(content_or_path, mode="r", encoding="utf-8-sig", errors="replace") as f:
             raw_text = f.read()
-    elif isinstance(content_or_path, io.StringIO):
-        raw_text = content_or_path.getvalue()
+    elif isinstance(content_or_path, str) and ("\n" in content_or_path or "\r" in content_or_path or content_or_path.startswith("MSH")):
+        raw_text = content_or_path
+    elif isinstance(content_or_path, str) and len(content_or_path) == 0:
+        # Empty string - return empty list
+        return []
     else:
         raw_text = str(content_or_path)
 

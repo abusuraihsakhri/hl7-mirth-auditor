@@ -3,6 +3,7 @@ CLI for hl7-mirth-auditor.
 """
 
 import argparse
+import os
 import sys
 from .parser import parse_hl7_stream
 from .auditor import audit_stream
@@ -51,6 +52,9 @@ def main(argv=None):
         return 0
 
     if args.command == "audit":
+        if not os.path.isfile(args.input):
+            print(f"Error: Input file not found: {args.input}", file=sys.stderr)
+            return 1
         messages = parse_hl7_stream(args.input)
         report = audit_stream(messages)
 
@@ -73,8 +77,16 @@ def main(argv=None):
         return 0
 
     if args.command == "sanitize":
+        if not os.path.isfile(args.input):
+            print(f"Error: Input file not found: {args.input}", file=sys.stderr)
+            return 1
         messages = parse_hl7_stream(args.input)
         sanitized_content = sanitize_stream(messages)
+        # Validate output directory exists
+        out_dir = os.path.dirname(os.path.abspath(args.output))
+        if not os.path.isdir(out_dir):
+            print(f"Error: Output directory not found: {out_dir}", file=sys.stderr)
+            return 1
         with open(args.output, "w", encoding="utf-8") as f:
             f.write(sanitized_content)
         print(f"Sanitization complete -> {args.output} ({len(messages)} messages de-identified)")
