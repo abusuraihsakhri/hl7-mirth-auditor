@@ -3,7 +3,6 @@ HL7 HIPAA De-Identification & PHI Sanitization Engine.
 """
 
 import hashlib
-import re
 from typing import List
 from .models import HL7Message, HL7Segment
 
@@ -17,7 +16,8 @@ def _pseudo_id(raw: str) -> str:
 
 def sanitize_hl7_message(msg: HL7Message) -> HL7Message:
     """
-    Produces a HIPAA Safe Harbor sanitized deep copy of the HL7 message.
+    Masks commonly identifying fields in a deep copy of the HL7 message.
+    This is not a complete Safe Harbor de-identification procedure.
     """
     sep = msg.field_sep
     sanitized_segments: List[HL7Segment] = []
@@ -46,10 +46,23 @@ def sanitize_hl7_message(msg: HL7Message) -> HL7Message:
             if len(fields_copy) > 13 and fields_copy[13]:
                 fields_copy[13] = "5550199"
 
-            # Scan any remaining fields (e.g. 18, 19) for SSN or Account Number patterns
-            for idx in range(14, len(fields_copy)):
-                if fields_copy[idx] and re.search(r"\d{3}-?\d{2}-?\d{4}", fields_copy[idx]):
-                    fields_copy[idx] = "000000000"
+            # Additional direct identifiers defined in PID (alternate IDs,
+            # mother's maiden name, alias, county, business phone, accounts,
+            # driver's license, birthplace and death date). Do not rely on
+            # a nine-digit pattern: many identifiers are alphanumeric.
+            for idx in (2, 4):
+                if len(fields_copy) > idx and fields_copy[idx]:
+                    fields_copy[idx] = _pseudo_id(fields_copy[idx])
+            for idx in (6, 9, 12, 18, 20, 21, 23, 29):
+                if len(fields_copy) > idx and fields_copy[idx]:
+                    fields_copy[idx] = "REDACTED"
+            if len(fields_copy) > 14 and fields_copy[14]:
+                fields_copy[14] = "5550199"
+            if len(fields_copy) > 19 and fields_copy[19]:
+                fields_copy[19] = "000000000"
+            for idx in range(30, len(fields_copy)):
+                if fields_copy[idx]:
+                    fields_copy[idx] = "REDACTED"
 
         elif seg.name in ("PV1", "OBR"):
             # Sanitize Attending / Ordering Doctor (PV1-7, OBR-16)
