@@ -16,7 +16,11 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Medical Science Apps.",
 ]
 requires-python = ">=3.9"
-dependencies = []
+dependencies = ["pydantic>=2.6,<3"]
+
+[project.optional-dependencies]
+server = ["fastapi>=0.110,<1", "uvicorn>=0.29,<1"]
+test = ["pytest>=8,<10", "httpx>=0.27,<1"]
 
 [project.scripts]
 hl7-auditor = "hl7_auditor.cli:main"
@@ -24,3 +28,6 @@ hl7-auditor = "hl7_auditor.cli:main"
 [project.urls]
 Homepage = "https://github.com/abusuraihsakhri/hl7-mirth-auditor"
 Repository = "https://github.com/abusuraihsakhri/hl7-mirth-auditor.git"
+
+[tool.setuptools.packages.find]
+include = ["hl7_auditor*", "agents*"]
