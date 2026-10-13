@@ -3,14 +3,19 @@ HL7 HIPAA De-Identification & PHI Sanitization Engine.
 """
 
 import hashlib
+import hmac
+import secrets
 from typing import List
 from .models import HL7Message, HL7Segment
+
+
+_PSEUDONYM_KEY = secrets.token_bytes(32)
 
 
 def _pseudo_id(raw: str) -> str:
     if not raw:
         return "ANON-001"
-    h = hashlib.sha256(raw.encode("utf-8")).hexdigest()[:8].upper()
+    h = hmac.new(_PSEUDONYM_KEY, raw.encode("utf-8"), hashlib.sha256).hexdigest()[:12].upper()
     return f"SYNTH-{h}"
 
 
