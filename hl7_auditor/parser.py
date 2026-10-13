@@ -15,7 +15,11 @@ def parse_hl7_stream(content_or_path: Union[str, io.StringIO]) -> List[HL7Messag
     """
     if isinstance(content_or_path, io.StringIO):
         raw_text = content_or_path.getvalue()
-    elif isinstance(content_or_path, (str, os.PathLike)) and os.path.isfile(content_or_path):
+    elif (isinstance(content_or_path, (str, os.PathLike))
+          and len(os.fspath(content_or_path)) < 4096
+          and "\n" not in os.fspath(content_or_path)
+          and "\r" not in os.fspath(content_or_path)
+          and os.path.isfile(content_or_path)):
         # Read an existing file; arbitrary single-line input is not treated as a path.
         with open(content_or_path, mode="r", encoding="utf-8-sig", errors="replace") as f:
             raw_text = f.read()
