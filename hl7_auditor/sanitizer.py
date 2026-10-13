@@ -53,13 +53,14 @@ def sanitize_hl7_message(msg: HL7Message) -> HL7Message:
             for idx in (2, 4):
                 if len(fields_copy) > idx and fields_copy[idx]:
                     fields_copy[idx] = _pseudo_id(fields_copy[idx])
-            for idx in (6, 9, 12, 18, 20, 21, 23, 29):
+            for idx in (6, 9, 12, 20, 21, 23, 29):
                 if len(fields_copy) > idx and fields_copy[idx]:
                     fields_copy[idx] = "REDACTED"
             if len(fields_copy) > 14 and fields_copy[14]:
                 fields_copy[14] = "5550199"
-            if len(fields_copy) > 19 and fields_copy[19]:
-                fields_copy[19] = "000000000"
+            for idx in (18, 19):
+                if len(fields_copy) > idx and fields_copy[idx]:
+                    fields_copy[idx] = "000000000"
             for idx in range(30, len(fields_copy)):
                 if fields_copy[idx]:
                     fields_copy[idx] = "REDACTED"
