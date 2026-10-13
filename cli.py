@@ -127,6 +127,9 @@ def main(argv=None):
         return 0
 
     if args.command == "serve":
+        if args.host not in ("127.0.0.1", "localhost", "::1") and not os.getenv("AUDITOR_API_KEY"):
+            print("Refusing non-local API listener without AUDITOR_API_KEY.", file=sys.stderr)
+            return 2
         import uvicorn
         from agents.api import app
         print(f"Starting Hl7 Mirth Auditor API server on http://{args.host}:{args.port}")
