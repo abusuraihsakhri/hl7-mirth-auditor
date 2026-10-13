@@ -30,6 +30,7 @@ def main(argv=None):
     # Audit command
     audit_parser = subparsers.add_parser("audit", help="Audit HL7 message stream for syntax errors, LIS issues, and PHI")
     audit_parser.add_argument("-i", "--input", required=True, help="Path to HL7 message file (.hl7, .txt)")
+    audit_parser.add_argument("--show-raw-values", action="store_true", help="Print sensitive source values (unsafe in shared logs)")
 
     # Sanitize command
     san_parser = subparsers.add_parser("sanitize", help="De-identify HL7 message stream (HIPAA Safe Harbor)")
@@ -70,7 +71,7 @@ def main(argv=None):
             for issue in report.issues:
                 sev_tag = f"[{issue.severity.value}]"
                 print(f"  Line {issue.line_number:3d} | {sev_tag:<14} | Seg: {issue.segment:<4} | {issue.message}")
-                if issue.raw_value:
+                if issue.raw_value and args.show_raw_values:
                     print(f"            Raw Value: '{issue.raw_value}'")
 
         print("=" * 80)
