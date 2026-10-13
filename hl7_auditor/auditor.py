@@ -129,7 +129,7 @@ def audit_hl7_message(msg: HL7Message) -> List[HL7Issue]:
                         segment="PID",
                         field_index=7,
                         severity=AuditSeverity.CRITICAL_PHI,
-                        message=f"HIPAA PHI: Date of Birth present in PID-7 ({pid_dob}).",
+                        message="HIPAA PHI: Date of Birth present in PID-7.",
                         raw_value=pid_dob,
                     )
                 )
@@ -179,7 +179,7 @@ def audit_hl7_message(msg: HL7Message) -> List[HL7Issue]:
                             segment="OBX",
                             field_index=5,
                             severity=AuditSeverity.ERROR,
-                            message=f"OBX-2 declared as Numeric ('NM') but OBX-5 has non-numeric value '{obs_val}'.",
+                            message="OBX-2 declared as Numeric (NM) but OBX-5 has a non-numeric value.",
                             raw_value=obs_val,
                         )
                     )
@@ -191,7 +191,7 @@ def audit_hl7_message(msg: HL7Message) -> List[HL7Issue]:
                         segment="OBX",
                         field_index=8,
                         severity=AuditSeverity.WARNING,
-                        message=f"CRITICAL LAB ALERT: Abnormal Panic Flag '{flag}' in OBX-8 for test '{obs_id}'.",
+                        message="CRITICAL LAB ALERT: Panic flag present in OBX-8.",
                         raw_value=flag,
                     )
                 )

@@ -8,3 +8,10 @@ dist/
 build/
 .DS_Store
 Thumbs.db
+.venv/
+.env
+.env.*
+!.env.example
+*.local.hl7
+.coverage
+htmlcov/
