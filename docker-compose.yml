@@ -1,17 +1,15 @@
-version: '3.8'
-
 services:
   hl7-mirth-auditor:
     build: .
-    container_name: hl7-mirth-auditor
     ports:
       - "8000:8000"
     environment:
-      - AUDIT_SECRET_KEY=${AUDIT_SECRET_KEY:-}
-      - MODEL_PROVIDER=mock
+      AUDIT_SECRET_KEY: ${AUDIT_SECRET_KEY:?Set AUDIT_SECRET_KEY to a persistent random secret}
+      AUDITOR_API_KEY: ${AUDITOR_API_KEY:?Set AUDITOR_API_KEY to a random access key}
+      MODEL_PROVIDER: mock
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
       interval: 30s
       timeout: 5s
       retries: 3
