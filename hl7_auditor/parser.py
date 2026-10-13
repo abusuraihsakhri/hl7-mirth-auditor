@@ -5,6 +5,7 @@ Handles standard delimiter extraction, multi-message streams, and segment tree e
 
 from typing import List, Optional, Union
 import io
+import os
 from .models import HL7Message, HL7Segment, HL7MessageType
 
 
@@ -14,8 +15,8 @@ def parse_hl7_stream(content_or_path: Union[str, io.StringIO]) -> List[HL7Messag
     """
     if isinstance(content_or_path, io.StringIO):
         raw_text = content_or_path.getvalue()
-    elif isinstance(content_or_path, str) and "\n" not in content_or_path and len(content_or_path) > 0 and not content_or_path.startswith("MSH"):
-        # Treat as file path only if it looks like a path (non-empty, no newlines, not HL7 content)
+    elif isinstance(content_or_path, (str, os.PathLike)) and os.path.isfile(content_or_path):
+        # Read an existing file; arbitrary single-line input is not treated as a path.
         with open(content_or_path, mode="r", encoding="utf-8-sig", errors="replace") as f:
             raw_text = f.read()
     elif isinstance(content_or_path, str) and ("\n" in content_or_path or "\r" in content_or_path or content_or_path.startswith("MSH")):
@@ -28,17 +29,20 @@ def parse_hl7_stream(content_or_path: Union[str, io.StringIO]) -> List[HL7Messag
 
     # Normalize line breaks
     normalized_lines = [
-        line.strip() for line in raw_text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
+        line for line in raw_text.lstrip("\ufeff").replace("\r\n", "\n").replace("\r", "\n").split("\n")
         if line.strip()
     ]
 
     messages: List[HL7Message] = []
     current_msg: Optional[HL7Message] = None
+    current_lines: List[str] = []
 
     for line_num, line in enumerate(normalized_lines, start=1):
         if line.startswith("MSH"):
             if current_msg is not None:
+                current_msg.raw_text = "\r".join(current_lines)
                 messages.append(current_msg)
+            current_lines = [line]
 
             # MSH segment defines delimiters
             # MSH|^~\&|...
@@ -83,8 +87,10 @@ def parse_hl7_stream(content_or_path: Union[str, io.StringIO]) -> List[HL7Messag
             current_msg.segments.append(
                 HL7Segment(name=seg_name, fields=raw_fields, line_num=line_num)
             )
+            current_lines.append(line)
 
     if current_msg is not None:
+        current_msg.raw_text = "\r".join(current_lines)
         messages.append(current_msg)
 
     return messages
