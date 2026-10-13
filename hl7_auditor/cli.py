@@ -45,7 +45,7 @@ def main(argv=None):
 
     if args.command == "sample-hl7":
         if args.output:
-            with open(args.output, "w", encoding="utf-8") as f:
+            with open(args.output, "w", encoding="utf-8", newline="") as f:
                 f.write(SAMPLE_HL7_STREAM)
             print(f"Sample HL7 stream saved to: {args.output}")
         else:
